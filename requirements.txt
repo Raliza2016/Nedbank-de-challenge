@@ -1,0 +1,15 @@
+# Runtime requirements for the pipeline image.
+#
+# The base image (nedbank-de-challenge/base:1.0) already includes:
+#   pyspark==3.5.0
+#   delta-spark==3.1.0
+#   pandas==2.1.0
+#   pyarrow==14.0.0
+#   pyyaml==6.0.1
+#   duckdb==0.10.0
+#
+# Do NOT re-pin those packages here — version conflicts will break the build.
+# Only add packages that are genuinely not in the base image.
+#
+# ── Local development only (NOT installed in the image) ─────────────────
+#   pytest==8.x          # pip install pytest && pytest

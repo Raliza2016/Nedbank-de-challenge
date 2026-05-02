@@ -1,0 +1,27 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# pytest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local data — never commit data
+/data/
+/output/
+/tmp/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local stream test files
+stream/*.jsonl
+!stream/.gitkeep

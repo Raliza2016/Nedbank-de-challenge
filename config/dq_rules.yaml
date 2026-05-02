@@ -1,0 +1,93 @@
+dq_rules:
+  transactions:
+    duplicate_deduped:
+      enabled: true
+      description: "Duplicate transaction events with same transaction_id"
+      key_fields:
+        - transaction_id
+      action: deduplicate
+      tiebreak_field: transaction_timestamp
+      tiebreak_order: asc
+
+    orphaned_account:
+      enabled: true
+      description: "Transaction references account_id not in accounts"
+      check: account_id_exists_in_accounts
+      action: flag
+      dq_flag: ORPHANED_ACCOUNT
+
+    type_mismatch:
+      enabled: true
+      description: "Amount field delivered as string instead of numeric"
+      fields:
+        amount:
+          expected_type: decimal
+      action: cast_or_flag
+      dq_flag: TYPE_MISMATCH
+
+    date_format:
+      enabled: true
+      description: "Date fields in mixed or unrecognised format"
+      fields:
+        - transaction_date
+      accepted_formats:
+        - "yyyy-MM-dd"
+        - "dd/MM/yyyy"
+        - epoch_int
+      action: standardise_or_flag
+      dq_flag: DATE_FORMAT
+
+    currency_variant:
+      enabled: true
+      description: "Currency field contains non-standard ZAR variant"
+      field: currency
+      valid_value: ZAR
+      variants:
+        - R
+        - rands
+        - "710"
+        - zar
+        - ZAR
+      action: standardise
+      dq_flag: CURRENCY_VARIANT
+
+    null_required:
+      enabled: true
+      description: "Non-nullable primary key field is null"
+      fields:
+        - transaction_id
+      action: reject
+      dq_flag: NULL_REQUIRED
+
+  accounts:
+    null_required:
+      enabled: true
+      description: "account_id primary key is null"
+      fields:
+        - account_id
+      action: reject
+      dq_flag: NULL_REQUIRED
+
+    date_format:
+      enabled: true
+      description: "Date fields in mixed format"
+      fields:
+        - open_date
+        - last_activity_date
+      accepted_formats:
+        - "yyyy-MM-dd"
+        - "dd/MM/yyyy"
+        - epoch_int
+      action: standardise_or_flag
+
+  customers:
+    date_format:
+      enabled: true
+      description: "dob field in mixed format"
+      fields:
+        - dob
+      accepted_formats:
+        - "yyyy-MM-dd"
+        - "dd/MM/yyyy"
+        - epoch_int
+      action: standardise_or_flag

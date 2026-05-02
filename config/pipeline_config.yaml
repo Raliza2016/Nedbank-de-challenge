@@ -1,0 +1,44 @@
+paths:
+  input:
+    accounts: /data/input/accounts.csv
+    transactions: /data/input/transactions.jsonl
+    customers: /data/input/customers.csv
+  output:
+    root: /data/output
+    bronze:
+      accounts: /data/output/bronze/accounts
+      transactions: /data/output/bronze/transactions
+      customers: /data/output/bronze/customers
+    silver:
+      accounts: /data/output/silver/accounts
+      transactions: /data/output/silver/transactions
+      customers: /data/output/silver/customers
+    gold:
+      fact_transactions: /data/output/gold/fact_transactions
+      dim_accounts: /data/output/gold/dim_accounts
+      dim_customers: /data/output/gold/dim_customers
+    stream_gold:
+      current_balances: /data/output/stream_gold/current_balances
+      recent_transactions: /data/output/stream_gold/recent_transactions
+    dq_report: /data/output/dq_report.json
+  stream:
+    input_dir: /data/stream
+
+pipeline:
+  stage: "1"
+  # OPTIMIZE + ZORDER on Gold tables. Improves downstream query performance
+  # via Delta data-skipping, but adds compaction time on Stage 2 (3M rows)
+  # under tight 2GB/2vCPU budgets. Default: off in scoring runs.
+  # Set to true (or env override OPTIMIZE_GOLD=1) when runtime budget permits.
+  optimize_gold: false
+
+spark:
+  master: local[2]
+  app_name: nedbank_de_pipeline
+  # Sized for the scoring harness: docker run -m 4g --cpus=2
+  # 1 GB driver + 2 GB executor = 3 GB JVM heap, leaving ~1 GB for Python
+  # workers, JVM overhead, and OS file-cache. Tuned for Stage 2 (3M txn).
+  driver_memory: 1g
+  executor_memory: 2g
+  default_parallelism: 2
+  shuffle_partitions: 4
